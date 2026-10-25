@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101827">
+  <title>GGL | Notification & Circular Management</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0b1220;--panel:#111c2e;--panel2:#16243a;--line:#293950;--text:#edf3fb;--muted:#a7b5c9;--accent:#61a5fa;--accent2:#8bdbd0;--danger:#ff8e8e;--ok:#8de0b3}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 20% 0%,#172a46 0,transparent 42%),var(--bg);font:15px/1.5 Inter,Segoe UI,Arial,sans-serif;color:var(--text);min-height:100vh}
+    button,input{font:inherit}button{cursor:pointer;border:0;border-radius:10px;padding:11px 16px;font-weight:700;background:var(--accent);color:#071426}button:disabled{opacity:.55;cursor:wait}
+    input{width:100%;border:1px solid var(--line);border-radius:10px;padding:12px;background:#0c1728;color:var(--text);outline:none}input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #61a5fa22}
+    .wrap{max-width:1180px;margin:auto;padding:28px 20px 48px}.top{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:34px}
+    .brand{display:flex;gap:12px;align-items:center}.logo{width:46px;height:46px;border-radius:14px;background:linear-gradient(145deg,#61a5fa,#8bdbd0);color:#071426;display:grid;place-items:center;font-weight:900;letter-spacing:-1px}
+    .brand h1{font-size:16px;line-height:1.25;margin:0}.brand p{color:var(--muted);margin:4px 0 0;font-size:12px}
+    .status{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px}.dot{width:8px;height:8px;border-radius:50%;background:#e5b86a;display:inline-block}.dot.ok{background:var(--ok)}.dot.bad{background:var(--danger)}
+    .layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(300px,.9fr);gap:22px;align-items:stretch}.hero,.card{border:1px solid var(--line);border-radius:20px;background:linear-gradient(160deg,#142239,#0f192a);padding:clamp(22px,4vw,42px)}
+    .eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.15em;color:var(--accent2);font-weight:800}.hero h2{font-size:clamp(30px,4.3vw,48px);line-height:1.08;letter-spacing:-.04em;margin:18px 0}.hero>p{color:var(--muted);max-width:520px}
+    .feature-list{display:grid;gap:14px;margin-top:32px}.feature{display:flex;gap:12px;align-items:flex-start}.feature .ico{width:34px;height:34px;border-radius:10px;background:#20334c;display:grid;place-items:center;flex-shrink:0;color:var(--accent2)}.feature b{display:block}.feature small{color:var(--muted)}
+    .card{padding:30px}.card h3{margin:0 0 6px;font-size:23px}.sub{margin:0 0 24px;color:var(--muted);font-size:13px}.field{margin:16px 0}.field label{display:block;font-size:13px;margin-bottom:7px;color:#d5deeb}.submit{width:100%;margin-top:8px}.message{display:none;border-radius:10px;padding:11px 12px;font-size:13px;margin-top:14px;overflow-wrap:anywhere}.message.show{display:block}.message.error{background:#421f2a;color:#ffc2c2;border:1px solid #773848}.message.info{background:#172d43;color:#c8e4ff;border:1px solid #294c6c}.message.success{background:#15372d;color:#b5f4d0;border:1px solid #28674f}
+    .fine{font-size:11px;color:var(--muted);margin-top:18px}.hidden{display:none!important}.dash-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}.dash-head h2{margin:5px 0;font-size:30px}.pill{display:inline-flex;border:1px solid var(--line);border-radius:99px;padding:5px 10px;font-size:12px;color:var(--accent2)}
+    .tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:22px 0}.tile{border:1px solid var(--line);background:var(--panel);border-radius:15px;padding:18px}.tile .n{font-size:24px;font-weight:800}.tile p{margin:4px 0 0;color:var(--muted);font-size:12px}.notice{border:1px dashed #3a506b;border-radius:14px;padding:20px;color:var(--muted);background:#101b2b}.foot{margin-top:28px;border-top:1px solid var(--line);padding-top:18px;color:var(--muted);font-size:11px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    @media(max-width:800px){.layout{grid-template-columns:1fr}.hero{padding:26px}.tiles{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}.status{align-self:flex-start}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="logo">GGL</div>
+      <div><h1>GAERISH LOGISTICS PRIVATE LIMITED</h1><p>Notification & Circular Management System</p></div>
+    </div>
+    <div class="status"><span id="statusDot" class="dot"></span><span id="apiStatus">Checking API configuration</span></div>
+  </header>
+
+  <main id="loginView" class="layout">
+    <section class="hero">
+      <div class="eyebrow">Internal communications portal</div>
+      <h2>One place for every official update.</h2>
+      <p>Access company circulars, operational notices and important announcements through a central employee portal.</p>
+      <div class="feature-list">
+        <div class="feature"><div class="ico">▤</div><div><b>Official circulars</b><small>Centralized circulars, reference numbers and document links.</small></div></div>
+        <div class="feature"><div class="ico">◉</div><div><b>Targeted notifications</b><small>Designed for branch, department and role-based communication.</small></div></div>
+        <div class="feature"><div class="ico">✓</div><div><b>Acknowledgement tracking</b><small>Foundation for read receipts and acknowledgement records.</small></div></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>Employee sign in</h3>
+      <p class="sub">Use your registered account to continue.</p>
+      <form id="loginForm" autocomplete="on">
+        <div class="field"><label for="email">Company email</label><input id="email" name="email" type="email" autocomplete="username" required maxlength="254" placeholder="you@company.com"></div>
+        <div class="field"><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required maxlength="128" placeholder="Enter your password"></div>
+        <button class="submit" id="loginBtn" type="submit">Sign in securely</button>
+      </form>
+      <div id="message" class="message" role="status" aria-live="polite"></div>
+      <p class="fine">Authorized users only. If you cannot sign in, contact your system administrator. Never share your password or session token.</p>
+    </section>
+  </main>
+
+  <main id="dashboardView" class="hidden">
+    <section class="card">
+      <div class="dash-head">
+        <div><span class="eyebrow">Employee workspace</span><h2>Welcome back</h2><p class="sub" id="userSummary">Your account details</p></div>
+        <button id="logoutBtn" type="button">Sign out</button>
+      </div>
+      <div class="tiles">
+        <div class="tile"><div class="n">—</div><p>Active circulars</p></div>
+        <div class="tile"><div class="n">—</div><p>Notifications</p></div>
+        <div class="tile"><div class="n">—</div><p>Pending acknowledgements</p></div>
+      </div>
+      <div class="notice"><b>Communication feed is not connected yet.</b><br>Authentication is the first integration stage. The next stage will connect published circulars, notifications and acknowledgement records to the Sheets database.</div>
+      <div id="adminPanel" class="notice hidden" style="margin-top:14px"><b>Administrator access verified</b><br>Admin publishing tools will be added in the next stage.</div>
+    </section>
+  </main>
+
+  <footer class="foot"><span>GGL · Internal Communications</span><span>Prototype frontend · Use only after security review</span></footer>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  // Apps Script web app deployment URL supplied for this project.
+  const API_URL = "https://script.google.com/macros/s/AKfycbzN6GBOlYddWU7M-wWkTveT7x3uXYYXmQERbABShwL1Acp_BVjdd0Yxj8uBzPfb-_9K/exec";
+  const TOKEN_KEY = "ggl_ncms_session";
+  const USER_KEY = "ggl_ncms_user";
+
+  const $ = id => document.getElementById(id);
+  const loginView = $("loginView");
+  const dashboardView = $("dashboardView");
+  const message = $("message");
+  const loginBtn = $("loginBtn");
+
+  function setMessage(text, type = "info") {
+    message.textContent = text;
+    message.className = "message show " + type;
+  }
+
+  function setApiStatus(text, type) {
+    $("apiStatus").textContent = text;
+    $("statusDot").className = "dot" + (type ? " " + type : "");
+  }
+
+  function showLogin() {
+    dashboardView.classList.add("hidden");
+    loginView.classList.remove("hidden");
+  }
+
+  function showDashboard(user) {
+    loginView.classList.add("hidden");
+    dashboardView.classList.remove("hidden");
+    $("userSummary").textContent =
+      `${user.email || ""} · ${user.role || "USER"} · ${user.branch || "Branch not assigned"} · ${user.department || "Department not assigned"}`;
+    $("adminPanel").classList.toggle(
+      "hidden", !["SUPER_ADMIN", "ADMIN"].includes(user.role)
+    );
+  }
+
+  async function api(action, fields = {}) {
+    // text/plain avoids a JSON content-type preflight in many browsers.
+    // Apps Script may still reject cross-origin response access; that is
+    // surfaced to the user rather than silently pretending login succeeded.
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action, ...fields }),
+      redirect: "follow",
+      cache: "no-store"
+    });
+    if (!response.ok) throw new Error("Server returned HTTP " + response.status);
+    return await response.json();
+  }
+
+  async function validateSavedSession() {
+    const token = sessionStorage.getItem(TOKEN_KEY);
+    const savedUser = sessionStorage.getItem(USER_KEY);
+    if (!token || !savedUser) return;
+
+    try {
+      const result = await api("me", { token });
+      if (!result.ok || !result.user) throw new Error("Session is no longer valid.");
+      sessionStorage.setItem(USER_KEY, JSON.stringify(result.user));
+      showDashboard(result.user);
+    } catch (err) {
+      sessionStorage.removeItem(TOKEN_KEY);
+      sessionStorage.removeItem(USER_KEY);
+      showLogin();
+      setMessage("Your saved session could not be verified. Please sign in again. " + friendlyError(err), "info");
+    }
+  }
+
+  function friendlyError(err) {
+    const text = String(err && err.message || err || "Unknown error");
+    if (/Failed to fetch|NetworkError|CORS|Load failed/i.test(text)) {
+      return "The browser could not read the Apps Script response. This may be a cross-origin restriction; verify the API from this GitHub Pages origin before using employee accounts.";
+    }
+    return text;
+  }
+
+  $("loginForm").addEventListener("submit", async event => {
+    event.preventDefault();
+    const email = $("email").value.trim();
+    const password = $("password").value;
+    if (!email || !password) return;
+
+    loginBtn.disabled = true;
+    loginBtn.textContent = "Signing in…";
+    message.className = "message";
+    try {
+      const result = await api("login", { email, password });
+      if (!result.ok || !result.token || !result.user) {
+        throw new Error(result.error || "Sign-in failed.");
+      }
+      sessionStorage.setItem(TOKEN_KEY, result.token);
+      sessionStorage.setItem(USER_KEY, JSON.stringify(result.user));
+      $("password").value = "";
+      setApiStatus("API reachable", "ok");
+      showDashboard(result.user);
+    } catch (err) {
+      setMessage(friendlyError(err), "error");
+    } finally {
+      loginBtn.disabled = false;
+      loginBtn.textContent = "Sign in securely";
+    }
+  });
+
+  $("logoutBtn").addEventListener("click", async () => {
+    const token = sessionStorage.getItem(TOKEN_KEY);
+    try {
+      if (token) await api("logout", { token });
+    } catch (err) {
+      // Clear the browser-side session even if the network is unavailable.
+    }
+    sessionStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(USER_KEY);
+    showLogin();
+    setMessage("You have been signed out of this browser session.", "success");
+  });
+
+  // Probe the deployed endpoint using GET, which is suitable for a simple browser request.
+  fetch(API_URL, { method: "GET", redirect: "follow", cache: "no-store" })
+    .then(response => response.json())
+    .then(data => {
+      if (data && data.ok) setApiStatus("API endpoint responds", "ok");
+      else setApiStatus("API response needs checking", "bad");
+    })
+    .catch(() => setApiStatus("Browser API access not verified", "bad"));
+
+  validateSavedSession();
+})();
+</script>
+</body>
+</html>
